@@ -1,6 +1,5 @@
 // ==UserScript==
-// @name         Crack Usernote Studio 💜 Neon Purple (iPhone · Galaxy · PC)
-// @namespace    usernote-studio-neon-original
+// @name         Crack Usernote Studio 💜 Neon Purple (iPhone · PC)
 // @version      0.5.4
 // @description  iPhone STAY · Android · PC / 모바일 편집·AI 결과 탭·업데이트 진단
 // @match        https://crack.wrtn.ai/*
