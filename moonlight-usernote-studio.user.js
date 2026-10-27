@@ -1,4 +1,4 @@
-/// ==UserScript==
+// ==UserScript==
 // @name         Crack Usernote Studio 💜 Neon Purple (iPhone · Galaxy · PC)
 // @namespace    usernote-studio-neon-original
 // @version      0.5.4
