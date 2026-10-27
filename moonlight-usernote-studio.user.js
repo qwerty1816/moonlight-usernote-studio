@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Crack Usernote Studio 💜 Neon Purple (iPhone · PC)
 // @namespace    usernote-studio-neon-original
-// @version      0.5.12
+// @version      0.5.13
 // @description  iPhone STAY · Android · PC / 모바일 편집·AI 결과 탭·업데이트 진단
 // @match        https://crack.wrtn.ai/*
 // @updateURL    https://raw.githubusercontent.com/qwerty1816/moonlight-usernote-studio/main/moonlight-usernote-studio.user.js
@@ -19,7 +19,7 @@
 'use strict';
 // 같은 버전의 중복 실행만 차단합니다. 다른 버전과 동시 설치는 피하세요.
 if(window.__cunsNeonStudioActive)return;window.__cunsNeonStudioActive=true;
-const STUDIO_VERSION='0.5.12';
+const STUDIO_VERSION='0.5.13';
 const STUDIO_URL='https://raw.githubusercontent.com/qwerty1816/moonlight-usernote-studio/main/moonlight-usernote-studio.user.js';
 const PREFIX='cuns-neon-v01:', LIMIT=2000;
 const get=(k,d)=>{try{const v=GM_getValue(PREFIX+k);return v===undefined?d:v}catch(e){try{return JSON.parse(localStorage.getItem(PREFIX+k))??d}catch(_){return d}}};
@@ -200,18 +200,12 @@ const style=document.createElement('style');style.textContent=`
 }
 /* v0.5.6 iOS STAY: scrollable independent modal and reachable footer */
 #cuns-overlay{position:fixed!important;inset:0!important;display:flex!important;align-items:flex-end!important;overflow:hidden!important;touch-action:auto!important}
-#cuns-sheet{flex:0 1 auto!important;min-height:0!important;overflow-y:scroll!important;overflow-x:hidden!important;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y!important;padding-bottom:calc(100px + env(safe-area-inset-bottom))!important;scroll-padding-bottom:110px}
-#cuns-sheet .cuns-card,#cuns-sheet .cuns-ai-pane,#cuns-sheet #cuns-body{touch-action:pan-y}
-#cuns-sheet textarea,#cuns-sheet input{touch-action:auto}
+#cuns-sheet{flex:0 1 auto!important;min-height:0!important;overflow-y:scroll!important;overflow-x:hidden!important;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:auto!important;padding-bottom:calc(100px + env(safe-area-inset-bottom))!important;scroll-padding-bottom:110px}
+#cuns-sheet .cuns-card,#cuns-sheet .cuns-ai-pane,#cuns-sheet #cuns-body{touch-action:auto}
+#cuns-sheet textarea,#cuns-sheet input{touch-action:auto!important;-webkit-user-select:text!important;user-select:text!important}
 #cuns-scroll-bottom{position:absolute;z-index:5;bottom:calc(16px + env(safe-area-inset-bottom));right:18px;border:1px solid #d5a5ff;border-radius:22px;background:#8236c9;color:white;font-weight:700;padding:11px 16px;box-shadow:0 3px 18px #15051e;pointer-events:auto;touch-action:manipulation}
 @media (max-width:480px){#cuns-sheet{padding:13px 12px 0}.cuns-mobile-editor .cuns-btn{font-size:12px!important}.cuns-editor-head .cuns-grid{max-height:94px;overflow:auto}.cuns-editor-scroll textarea{height:32vh}}
 `;document.head.appendChild(style);
-const mobileStyle=document.createElement('style');mobileStyle.textContent=`
-#cuns-mobile-launch{display:none!important}
-@media (pointer:coarse),(max-width:700px){
- #cuns-mobile-launch{display:block!important;position:relative!important;z-index:10!important;align-self:flex-start!important;margin:10px 0!important;padding:10px 15px!important;border:1px solid #d6a7ff!important;border-radius:999px!important;background:#8034c8!important;color:#fff!important;font-size:14px!important;font-weight:700!important;pointer-events:auto!important;touch-action:manipulation!important}
- #cuns-launch{display:inline-flex!important;align-items:center!important;position:relative!important;z-index:10!important;pointer-events:auto!important;touch-action:manipulation!important}
-}`;document.head.appendChild(mobileStyle);
 function find(){
  const areas=[...document.querySelectorAll('textarea')].filter(el=>!el.closest('#cuns-overlay')&&el.getClientRects().length>0);
  for(const el of areas){
@@ -231,7 +225,7 @@ window.visualViewport?.addEventListener('resize',syncViewport);window.visualView
 function comparisonHtml(){const before=getAiSource().length,after=result.length,diff=before-after;const pct=before?Math.round(diff/before*1000)/10:0;const state=!before?'압축 원문을 먼저 선택하세요':!result?'결과를 붙여넣으면 절약량을 계산해요':diff>0?`💜 ${diff.toLocaleString()}자 절약 (${pct}%)`:diff===0?'원문과 글자 수 동일':`⚠️ 원문보다 ${(-diff).toLocaleString()}자 증가`;
 return `원문 <b>${before.toLocaleString()}자</b> → 결과 <b id="cuns-result-count">${after.toLocaleString()}자</b><div style="margin-top:6px;color:${diff<0&&result?'#ffb3c7':'#d9b4ff'}">${state}</div>`;}
 function updateComparison(){const el=root?.querySelector('#cuns-compare');if(el)el.innerHTML=comparisonHtml();}
-function render(){if(!root)return;syncViewport();const sheet=root.querySelector('#cuns-sheet');if(editorMode){sheet.innerHTML=editorHtml();sheet.scrollTop=0;return;}const n=ta?.value.length||0;const pct=Math.min(100,n/LIMIT*100);sheet.innerHTML=`<div class="cuns-head"><div><div class="cuns-title">✦ USERNOTE STUDIO 💜</div><div class="cuns-sub">NEON PURPLE · v0.5.12 · STAY / GALAXY / PC</div></div><button class="cuns-close" data-action="close">✕</button></div><div class="cuns-card"><div class="cuns-row"><b class="cuns-grow">유저노트 사용량</b><span class="cuns-count">${n.toLocaleString()} / ${LIMIT.toLocaleString()}</span></div><div class="cuns-bar"><i style="width:${pct}%"></i></div><div class="cuns-muted" style="margin-top:7px">${n>LIMIT?'⚠️ 제한 초과 '+(n-LIMIT)+'자':'남은 공간 '+(LIMIT-n)+'자'} · 선택 프리셋 ${selected.size}개</div></div><div class="cuns-tabs"><button data-tab="presets" class="${tab==='presets'?'on':''}">✦ 프리셋</button><button data-tab="drafts" class="${tab==='drafts'?'on':''}">◷ 임시저장</button><button data-tab="ai" class="${tab==='ai'?'on':''}">✧ AI 압축</button></div><div id="cuns-body"></div>`;
+function render(){if(!root)return;syncViewport();const sheet=root.querySelector('#cuns-sheet');if(editorMode){sheet.innerHTML=editorHtml();sheet.scrollTop=0;return;}const n=ta?.value.length||0;const pct=Math.min(100,n/LIMIT*100);sheet.innerHTML=`<div class="cuns-head"><div><div class="cuns-title">✦ USERNOTE STUDIO 💜</div><div class="cuns-sub">NEON PURPLE · v0.5.13 · STAY / GALAXY / PC</div></div><button class="cuns-close" data-action="close">✕</button></div><div class="cuns-card"><div class="cuns-row"><b class="cuns-grow">유저노트 사용량</b><span class="cuns-count">${n.toLocaleString()} / ${LIMIT.toLocaleString()}</span></div><div class="cuns-bar"><i style="width:${pct}%"></i></div><div class="cuns-muted" style="margin-top:7px">${n>LIMIT?'⚠️ 제한 초과 '+(n-LIMIT)+'자':'남은 공간 '+(LIMIT-n)+'자'} · 선택 프리셋 ${selected.size}개</div></div><div class="cuns-tabs"><button data-tab="presets" class="${tab==='presets'?'on':''}">✦ 프리셋</button><button data-tab="drafts" class="${tab==='drafts'?'on':''}">◷ 임시저장</button><button data-tab="ai" class="${tab==='ai'?'on':''}">✧ AI 압축</button></div><div id="cuns-body"></div>`;
 const body=sheet.querySelector('#cuns-body');if(tab==='presets'){body.innerHTML=`<div class="cuns-muted">선택한 프리셋은 노트 끝에 붙어요. 체크를 해제하면 제거돼요.</div><div id="cuns-list">${presets.length?presets.map(p=>`<div class="cuns-card"><div class="cuns-row"><input type="checkbox" data-toggle="${esc(p.id)}" ${selected.has(p.id)?'checked':''}><div class="cuns-grow"><b>${esc(p.name)}</b><div class="cuns-tag">${block(p).length}자</div></div><button class="cuns-btn" data-edit="${esc(p.id)}">편집</button><button class="cuns-btn danger" data-delete="${esc(p.id)}">삭제</button></div></div>`).join(''):'<div class="cuns-empty">아직 프리셋이 없어요 ✨</div>'}</div><div class="cuns-card"><b>＋ 새 프리셋</b><input class="cuns-input" id="cuns-name" placeholder="프리셋 제목 (예: 전개 규칙)"><textarea class="cuns-input cuns-area" id="cuns-text" placeholder="프리셋 내용을 입력하세요"></textarea><div class="cuns-grid"><button class="cuns-btn primary" data-action="add">프리셋 저장</button><button class="cuns-btn" data-action="export">백업 복사</button><button class="cuns-btn" data-action="import">백업 가져오기</button></div></div>`}
 if(tab==='drafts'){const arr=get('draft:'+room(),[]);const auto=get('auto:'+room(),null);body.innerHTML=`<div class="cuns-card"><b>🔄 업데이트 확인</b><div class="cuns-muted">설치된 버전: v${STUDIO_VERSION} · GitHub 배포 버전 확인 (자동 설치는 STAY/템퍼몽키가 담당)</div><div class="cuns-grid"><button class="cuns-btn" data-action="check-update" ${updateBusy?'disabled':''}>${updateBusy?'확인 중…':'GitHub 최신 버전 확인'}</button><button class="cuns-btn" data-action="open-install">설치 주소 열기</button></div>${updateStatus?`<div class="cuns-status">${esc(updateStatus)}</div>`:''}</div><div class="cuns-grid"><button class="cuns-btn primary" data-action="snapshot">현재 노트 백업</button><button class="cuns-btn" data-action="editor-open-note">📱 전체 화면 편집</button></div><div class="cuns-card"><b>🕰️ 자동 백업 타임머신</b>${get(historyKey(),[]).map(d=>`<div class="cuns-row" style="margin-top:8px"><span class="cuns-grow cuns-muted">${new Date(d.at).toLocaleString('ko-KR')} · ${esc(d.reason)} · ${d.text.length}자</span><button class="cuns-btn" data-history="${esc(d.id)}">복원</button></div>`).join('')||'<div class="cuns-muted">아직 이력이 없어요</div>'}</div>${auto?`<div class="cuns-card"><b>최근 자동저장</b><div class="cuns-muted">${new Date(auto.at).toLocaleString('ko-KR')} · ${auto.text.length}자</div><div class="cuns-grid"><button class="cuns-btn" data-load-auto="1">복원</button></div></div>`:''}${arr.map(d=>`<div class="cuns-card"><b>백업 ${new Date(d.at).toLocaleString('ko-KR')}</b><div class="cuns-muted">${d.text.length}자 · ${esc(d.text.slice(0,45))}</div><div class="cuns-grid"><button class="cuns-btn" data-load="${esc(d.id)}">이 버전 복원</button></div></div>`).join('')||'<div class="cuns-empty">저장된 백업이 없어요</div>'}`}
 if(tab==='ai'){
@@ -244,7 +238,7 @@ ${aiMode==='api'?`<div class="cuns-muted">본인 API 키로 자동 압축해요.
 <label><input type="radio" name="cuns-source" value="part" ${aiSource==='part'?'checked':''}>일부분 선택</label>
 <label><input type="radio" name="cuns-source" value="manual" ${aiSource==='manual'?'checked':''}>새 내용 직접 입력</label></div>
 ${aiSource==='part'?`<div class="cuns-muted">아래 현재 노트에서 원하는 글자를 손가락으로 선택한 뒤 <b>선택 영역 지정</b>을 눌러줘. 선택한 부분만 압축하고, 나머지는 유지해요.</div>
-<textarea id="cuns-part-full" class="cuns-input cuns-area" style="min-height:190px;cursor:text;user-select:text;-webkit-user-select:text" spellcheck="false">${esc(base())}</textarea>
+<textarea id="cuns-part-full" class="cuns-input cuns-area" style="min-height:190px;cursor:text;user-select:text;-webkit-user-select:text" spellcheck="false" readonly>${esc(base())}</textarea>
 <div class="cuns-grid"><button class="cuns-btn primary" data-action="select-part">✂️ 선택 영역 지정</button><button class="cuns-btn primary" data-action="editor-open-part">📱 터치로 선택</button><button class="cuns-btn" data-action="clear-part">선택 초기화</button></div>
 <div class="cuns-muted" style="margin-top:8px">${partSelection?'선택됨: '+partSelection.text.length.toLocaleString()+'자':'아직 선택한 부분이 없어요.'}</div>`:''}
 ${aiSource!=='part'?`<div class="cuns-row" style="margin-top:10px"><b class="cuns-grow">${aiSource==='note'?'현재 유저노트 (자동 불러오기)':'새로 입력할 내용'}</b><span class="cuns-count" id="cuns-source-count">${src.length.toLocaleString()}자</span></div>
@@ -365,14 +359,10 @@ async function checkStudioUpdate(){
  }catch(e){updateStatus='버전 확인 실패: '+e.message+'. 네트워크 또는 스크립트 관리자 권한을 확인해 주세요.';}
  finally{updateBusy=false;render();}
 }
-function attach(d){document.getElementById('cuns-mobile-launch')?.remove();protectedBlocks=get('protect:'+room(),[]);if(!Array.isArray(protectedBlocks))protectedBlocks=[];dialog=d;ta=d.querySelector('textarea:not(#cuns-result)');if(!ta)return;original=ta.value;applied='';selected.clear();const launchBtn=document.createElement('button');launchBtn.id='cuns-launch';launchBtn.type='button';launchBtn.textContent='💜 스튜디오';launchBtn.onclick=launch;const title=[...d.querySelectorAll('h1,h2,h3,div,span,p')].find(el=>[...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()==='유저노트'));if(title)title.insertAdjacentElement('afterend',launchBtn);else ta.insertAdjacentElement('beforebegin',launchBtn);ta.addEventListener('input',autosave);
- const mb=document.createElement('button');mb.id='cuns-mobile-launch';mb.type='button';mb.textContent='💜 스튜디오';mb.onclick=launch;ta.insertAdjacentElement('beforebegin',mb);
+function attach(d){protectedBlocks=get('protect:'+room(),[]);if(!Array.isArray(protectedBlocks))protectedBlocks=[];dialog=d;ta=d.querySelector('textarea:not(#cuns-result)');if(!ta)return;original=ta.value;applied='';selected.clear();const launchBtn=document.createElement('button');launchBtn.id='cuns-launch';launchBtn.type='button';launchBtn.textContent='💜 스튜디오';launchBtn.onclick=launch;const title=[...d.querySelectorAll('h1,h2,h3,div,span,p')].find(el=>[...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()==='유저노트'));if(title)title.insertAdjacentElement('afterend',launchBtn);else ta.insertAdjacentElement('beforebegin',launchBtn);ta.addEventListener('input',autosave);
 }
-function tick(){const d=find();if(!d)document.getElementById('cuns-mobile-launch')?.remove();if(d!==dialog){close();dialog=null;ta=null;applied='';selected.clear();if(d)attach(d)}else if(d&&!d.querySelector('#cuns-launch')){dialog=null;tick()}}
-const obs=new MutationObserver(()=>{if(!document.getElementById('cuns-overlay'))tick()});obs.observe(document.documentElement,{childList:true,subtree:true});setInterval(tick,1800);document.addEventListener('pointerdown',e=>{
- if(!editorMode||!root?.contains(e.target))return;
- const b=e.target.closest('button');if(b?.closest('.cuns-editor-foot') && e.pointerType!=='mouse')e.preventDefault();
-},true);
+function tick(){const d=find();if(!d)if(d!==dialog){close();dialog=null;ta=null;applied='';selected.clear();if(d)attach(d)}else if(d&&!d.querySelector('#cuns-launch')){dialog=null;tick()}}
+const obs=new MutationObserver(()=>{if(!document.getElementById('cuns-overlay'))tick()});obs.observe(document.documentElement,{childList:true,subtree:true});setInterval(tick,1800);
 // PC: retain native mouse selection in the partial-note source textarea.
 function rememberPartRange(e){if(e.target?.id!=='cuns-part-full')return;const el=e.target;if(el.selectionEnd>el.selectionStart)pcPartRange=[el.selectionStart,el.selectionEnd];}
 document.addEventListener('mouseup',rememberPartRange,true);
